@@ -1,10 +1,10 @@
 import boto3
 import sys
-
+ 
 ec2 = boto3.client('ec2')
-
+ 
 def ejecutar(accion, instance_id=None):
-
+ 
     if accion == "listar":
         try:
             data = ec2.describe_instances()
@@ -13,7 +13,7 @@ def ejecutar(accion, instance_id=None):
                     print(i["InstanceId"], i["State"]["Name"])
         except Exception as e:
             print(f"Error al listar instancias: {e}")
-
+ 
     elif accion == "iniciar":
         if not instance_id:
             print("Falta instance_id")
@@ -23,3 +23,13 @@ def ejecutar(accion, instance_id=None):
             print("Instancia iniciada")
         except Exception as e:
             print(f"Error al iniciar instancia: {e}")
+ 
+    elif accion == "detener":
+        if not instance_id:
+            print("Falta instance_id")
+            return
+        try:
+            ec2.stop_instances(InstanceIds=[instance_id])
+            print("Instancia detenida")
+        except Exception as e:
+            print(f"Error al detener instancia: {e}")
