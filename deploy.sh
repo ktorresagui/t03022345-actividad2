@@ -11,6 +11,10 @@ if [ -z "$accion" ] || [ -z "$instancia" ]; then
 fi
 
 python3 ec2/gestionar_ec2.py $accion $instancia
+if [ $? -ne 0 ]; then
+    echo "Fallo en EC2"
+    exit 1
+fi
 
 if [ -z "$accion" ] || [ -z "$instancia" ] || [ -z "$carpeta" ] || [ -z "$bucket" ]; then
     echo "Uso: ./deploy.sh accion instance_id directorio bucket"
@@ -18,3 +22,7 @@ if [ -z "$accion" ] || [ -z "$instancia" ] || [ -z "$carpeta" ] || [ -z "$bucket
 fi
 
 bash s3/backup_s3.sh $carpeta $bucket
+if [ $? -ne 0 ]; then
+    echo "Fallo en S3"
+    exit 1
+fi
