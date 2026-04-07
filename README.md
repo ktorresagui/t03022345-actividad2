@@ -62,37 +62,3 @@ Se utilizó una estrategia de ramas basada en buenas prácticas:
 ### Ejecución completa
 
     ./deploy.sh iniciar i-123456 ./data mi-bucket-devops
-
----
-
-# Reflexión
-
-## ¿Qué ventaja tienen los commits progresivos?
-
-Los commits progresivos permiten dividir el desarrollo en cambios pequeños, claros y controlados. Esto facilita el seguimiento del historial del proyecto y permite identificar con mayor facilidad en qué momento se introdujo un error.
-
-Además, ayudan a mantener un desarrollo ordenado, mejoran la colaboración en equipo y permiten revertir cambios específicos sin afectar todo el sistema. En entornos DevOps, esta práctica es clave para mantener la estabilidad del sistema y facilitar la integración continua.
-
----
-
-## ¿Por qué evitar hardcoding?
-
-Evitar el hardcoding permite que el sistema sea más flexible, reutilizable y fácil de mantener. Cuando los valores están definidos directamente en el código, cualquier cambio requiere modificar la lógica del programa, lo cual aumenta el riesgo de errores.
-
-Al utilizar parámetros o archivos de configuración, es posible adaptar el sistema a distintos entornos sin modificar el código, lo cual es fundamental en procesos de automatización y despliegue continuo.
-
----
-
-## ¿Qué rol cumple deploy.sh?
-
-El script deploy.sh cumple la función de orquestador dentro del sistema. Se encarga de coordinar la ejecución de los scripts de gestión de EC2 y respaldo en S3, integrando todas las tareas en un solo flujo automatizado.
-
-Además, simula un pipeline de CI/CD, permitiendo ejecutar múltiples procesos con un solo comando. Esto reduce la intervención manual, mejora la eficiencia operativa y minimiza errores.
-
----
-
-## ¿Qué ventaja tiene separar config del código?
-
-Separar la configuración del código permite modificar valores sin necesidad de alterar la lógica del programa. Esto mejora la mantenibilidad, reduce riesgos y facilita la reutilización del código en diferentes escenarios.
-
-También permite manejar distintos entornos de ejecución simplemente cambiando el archivo de configuración, lo cual es una práctica esencial en DevOps para lograr sistemas más flexibles y escalables.
