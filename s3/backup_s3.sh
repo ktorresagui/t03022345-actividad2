@@ -27,3 +27,11 @@ if [ $? -ne 0 ]; then
   echo "[$NOW] Error al comprimir $DIR" >> $LOGFILE
   exit 1
 fi
+
+aws s3 cp $FILE s3://$BUCKET/
+
+if [ $? -ne 0 ]; then
+  echo "Error al subir a S3"
+  echo "[$NOW] Error al subir $FILE a S3" >> $LOGFILE
+  exit 1
+fi
