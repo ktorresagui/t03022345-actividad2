@@ -19,3 +19,11 @@ if [ ! -d "$DIR" ]; then
   echo "[$NOW] Error: directorio no existe: $DIR" >> $LOGFILE
   exit 1
 fi
+
+tar -czf $FILE $DIR
+
+if [ $? -ne 0 ]; then
+  echo "Error al comprimir"
+  echo "[$NOW] Error al comprimir $DIR" >> $LOGFILE
+  exit 1
+fi
