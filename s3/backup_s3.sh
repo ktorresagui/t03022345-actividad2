@@ -35,3 +35,7 @@ if [ $? -ne 0 ]; then
   echo "[$NOW] Error al subir $FILE a S3" >> $LOGFILE
   exit 1
 fi
+
+echo "[$NOW] Backup subido correctamente: $FILE" >> $LOGFILE
+
+echo " Backup completado correctamente"
