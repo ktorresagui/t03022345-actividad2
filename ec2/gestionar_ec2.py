@@ -33,3 +33,21 @@ def ejecutar(accion, instance_id=None):
             print("Instancia detenida")
         except Exception as e:
             print(f"Error al detener instancia: {e}")
+ 
+    elif accion == "terminar":
+        if not instance_id:
+            print("Falta instance_id")
+            return
+        try:
+            ec2.terminate_instances(InstanceIds=[instance_id])
+            print("Instancia eliminada")
+        except Exception as e:
+            print(f"Error al terminar instancia: {e}")
+ 
+    else:
+        print("Comando inválido")
+ 
+ 
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Faltan parámetros")
