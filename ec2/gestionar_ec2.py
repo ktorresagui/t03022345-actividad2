@@ -51,3 +51,8 @@ def ejecutar(accion, instance_id=None):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Faltan parámetros")
+    else:
+        accion = sys.argv[1]
+        instance_id = sys.argv[2] if len(sys.argv) > 2 else None
+        ejecutar(accion, instance_id)
+ 
