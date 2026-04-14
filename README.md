@@ -1,64 +1,173 @@
-# Actividad 2: DevOps
-## Karol Stephania Torres Aguilar
+# Volaris – Sistema de Reservas de Vuelos
 
-## Descripción del proyecto
-
-Este proyecto implementa una solución de automatización en AWS con enfoque DevOps. Permite gestionar instancias EC2 mediante Python utilizando la librería Boto3, realizar respaldos de información en Amazon S3 mediante scripts en Bash y simular un flujo de integración y despliegue continuo (CI/CD) a través de un script de orquestación.
-
-Además, se aplican buenas prácticas como el uso de control de versiones con Git y GitHub, la separación entre configuración y lógica, y la automatización de tareas operativas.
-
-El proyecto se ejecuta desde una instancia EC2 dentro del entorno AWS Learner Lab.
+Aplicación web fullstack para búsqueda y reserva de vuelos nacionales con tarifas por tipo (Básica, Clásica, Flexible).
 
 ---
 
-## Instrucciones de uso
+## Descripción
 
-1. Cargar las variables de configuración:
-
-    source config/config.env
-
-2. Ejecutar el script principal de despliegue:
-
-    ./deploy.sh <accion> <instance_id> <directorio> <bucket>
-
-3. Ejemplo de ejecución:
-
-    ./deploy.sh iniciar i-123456 ./data mi-bucket-devops
-
-Este comando ejecuta la acción sobre la instancia EC2 y realiza el respaldo del directorio hacia el bucket S3.
+Sistema que permite a los usuarios:
+- Buscar vuelos por origen, destino y fecha
+- Comparar tarifas (Básica / Clásica / Flexible) con diferente equipaje incluido
+- Registrar reservas con nombre y correo del pasajero
+- Consultar el historial de reservas
 
 ---
 
-## Flujo Git
+## Arquitectura
 
-Se utilizó una estrategia de ramas basada en buenas prácticas:
+```
+Usuario → Navegador
+             ↓ :8080
+        Frontend (nginx)
+             ↓ /api/*
+        Backend (Express :3000)
+             ↓
+        MongoDB (:27017)
+```
 
-- main: versión estable  
-- develop: integración  
-- feature/*: desarrollo de funcionalidades  
-
-### Flujo de trabajo
-
-1. Crear rama feature desde develop  
-2. Desarrollar la funcionalidad  
-3. Realizar commits progresivos  
-4. Hacer push al repositorio  
-5. Merge a develop  
-6. Merge a main  
+| Servicio          | Tecnología      | Puerto     |
+|-------------------|-----------------|-----------|
+| volaris-frontend  | nginx + HTML/Vue CDN | 8080  |
+| volaris-backend   | Node.js + Express   | 3000 (interno) |
+| volaris-mongodb   | MongoDB 6           | 27017 (interno) |
 
 ---
 
-## Ejemplos
+## Tecnologías
 
-### Gestión de EC2
+- **Frontend:** HTML5, CSS3, JavaScript, Vue.js 3 (CDN), nginx
+- **Backend:** Node.js, Express, Winston (logs)
+- **Base de datos:** MongoDB 6
+- **Contenedores:** Docker, Docker Compose
+- **Nube:** AWS CloudFormation (EC2 + S3)
+- **Automatización:** Bash
 
-    python3 ec2/gestionar_ec2.py listar
-    python3 ec2/gestionar_ec2.py iniciar i-123456
+---
 
-### Respaldo en S3
+## Ejecución local (Docker)
 
-    bash s3/backup_s3.sh ./data mi-bucket-devops
+```bash
+# 1. Clonar repositorio
+git clone <URL_DEL_REPO>
+cd volaris
 
-### Ejecución completa
+# 2. Permisos a scripts
+chmod +x start.sh stop.sh backup.sh
 
-    ./deploy.sh iniciar i-123456 ./data mi-bucket-devops
+# 3. Levantar
+./start.sh
+
+# 4. Abrir en navegador
+http://localhost:8080
+```
+
+O directamente con Docker Compose:
+
+```bash
+docker compose up -d --build
+docker compose logs -f
+docker compose down
+```
+
+---
+
+## Despliegue en EC2
+
+### 1. Crear infraestructura
+
+```bash
+aws cloudformation create-stack \
+  --stack-name volaris-stack \
+  --template-body file://cloudformation/template.yaml \
+  --parameters \
+    ParameterKey=KeyPairName,ParameterValue=mi-key \
+    ParameterKey=BucketName,ParameterValue=mi-bucket-volaris
+```
+
+### 2. Conectarse
+
+```bash
+ssh -i mi-key.pem ec2-user@<IP_EC2>
+```
+
+### 3. Desplegar
+
+```bash
+git clone <URL_DEL_REPO>
+cd volaris
+chmod +x start.sh
+./start.sh
+# Disponible en http://<IP_EC2>:8080
+```
+
+---
+
+## Puertos
+
+| Puerto | Servicio          |
+|--------|-------------------|
+| 8080   | Frontend (público) |
+| 3000   | Backend (interno)  |
+| 27017  | MongoDB (interno)  |
+
+---
+
+## Endpoints API
+
+| Método | Ruta        | Descripción                         |
+|--------|-------------|--------------------------------------|
+| GET    | /flights    | Buscar vuelos (origen, destino, fecha) |
+| POST   | /book       | Registrar una reserva                |
+| GET    | /reservas   | Listar reservas guardadas            |
+| GET    | /health     | Estado del servidor                  |
+
+---
+
+## Scripts Bash
+
+```bash
+./start.sh [URL_REPO]       # Inicia la app
+./stop.sh                   # Detiene contenedores
+./backup.sh                 # Backup local
+./backup.sh --s3 <bucket>   # Backup + subir a S3
+```
+
+### Cron automático
+
+```bash
+crontab -e
+# Backup diario a las 3:00 AM
+0 3 * * * /home/ec2-user/volaris/backup.sh >> /var/log/volaris-backup.log 2>&1
+```
+
+---
+
+## Logs
+
+Generados en `/app/logs/app.log` dentro del contenedor backend.
+
+```
+[2026-04-09 10:00:00] INFO: Servidor corriendo en puerto 3000
+[2026-04-09 10:01:05] INFO: GET /flights - ::ffff:172.18.0.1
+[2026-04-09 10:01:05] INFO: Búsqueda: Ciudad de México a Cancún | 2026-04-15
+[2026-04-09 10:01:05] INFO: Resultados encontrados: 9
+[2026-04-09 10:02:30] INFO: Reserva guardada: 663b... | V001 | María López
+```
+
+```bash
+docker compose logs -f backend
+```
+
+---
+
+## S3
+
+El bucket almacena:
+- `backups/db/`  dumps de MongoDB
+- `backups/logs/`  logs comprimidos
+
+```bash
+aws s3 ls s3://mi-bucket-volaris/backups/
+```
+
